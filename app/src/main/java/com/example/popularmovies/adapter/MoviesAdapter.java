@@ -16,20 +16,22 @@ import java.util.List;
 
 public class MoviesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener {
 
-    private static final String TAG = MoviesAdapter.class.getSimpleName();
-    private List<Movie> data;
+    // --Commented out by Inspection (16/6/20 5:35 PM):private static final String TAG = MoviesAdapter.class.getSimpleName();
+    private final List<Movie> data;
+    private Callback callback;
 
 
     public MoviesAdapter(List<Movie> data) {
         this.data = data;
     }
 
+    @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.list_item_movie, parent, false);
-        return new MoviesListViewHolder(view);
+        return new MoviesListViewHolder(view, callback);
 
     }
 
@@ -37,6 +39,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
         ((MoviesListViewHolder)viewHolder).bindData(getItemByPosition(position));
 
+    }
+
+    public void setCallback(Callback callback) {
+        this.callback = callback;
     }
 
     @Override
@@ -51,6 +57,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public void onClick(View v) {
 
+    }
+
+    public interface Callback {
+        void onListItemClick(int position);
     }
 
 
