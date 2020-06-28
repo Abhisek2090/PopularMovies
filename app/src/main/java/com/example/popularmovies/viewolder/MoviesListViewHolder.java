@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.popularmovies.R;
 import com.example.popularmovies.adapter.MoviesAdapter;
-import com.example.popularmovies.model.Movie;
+import com.example.popularmovies.database.Movie;
 import com.example.popularmovies.utils.Constants;
 import com.squareup.picasso.Picasso;
 

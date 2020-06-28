@@ -7,4 +7,10 @@
     <string name="ERROR_MESSAGE">Some Error Occured</string>
     <string name="POPULAR">POPULAR</string>
     <string name="HIGHEST_RATED">HIGHEST RATED</string>
+    <string name="FAVOURITES">FAVOURITES</string>
+    <string name="trailers">TRAILERS</string>
+    <string name="reviews">REVIEWS</string>
+    <string name="add_to_favourites">Add To Favourites</string>
+    <string name="favourite">Favourite</string>
+    <string name="movie_details">Movie Details</string>
 </resources>

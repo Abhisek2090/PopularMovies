@@ -1,6 +1,8 @@
-package activities;
+package com.example.popularmovies.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -8,6 +10,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,9 +18,10 @@ import android.widget.Spinner;
 
 import com.example.popularmovies.R;
 import com.example.popularmovies.adapter.MoviesAdapter;
-import com.example.popularmovies.model.Movie;
+import com.example.popularmovies.database.Movie;
 import com.example.popularmovies.utils.Constants;
 import com.example.popularmovies.utils.JsonUtils;
+import com.example.popularmovies.viewmodel.MainViewModel;
 
 import org.json.JSONException;
 
@@ -36,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private RecyclerView moviesRecyclerView;
     private MoviesAdapter moviesAdapter;
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,11 +52,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         moviesRecyclerView = findViewById(R.id.moviesRecyclerView);
         moviesRecyclerView.setLayoutManager(layoutManager);
+        moviesAdapter = new MoviesAdapter();
+        moviesRecyclerView.setAdapter(moviesAdapter);
+
+        moviesAdapter.setCallback(new MoviesAdapter.Callback() {
+            @Override
+            public void onListItemClick(int position) {
+                startDetailActivity(moviesAdapter.getItemByPosition(position));
+            }
+        });
 
         //get the spinner from the xml.
         Spinner dropdown = findViewById(R.id.spinner);
         //create a list of items for the spinner.
-        String[] items = new String[]{getString(R.string.POPULAR), getString(R.string.HIGHEST_RATED)};
+        String[] items = new String[]{getString(R.string.POPULAR), getString(R.string.HIGHEST_RATED),getString(R.string.FAVOURITES)};
         //create an adapter to describe how the items are displayed, adapters are used in several places in android.
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
         //set the spinners adapter to the previously created one.
@@ -66,8 +81,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if(selected.equalsIgnoreCase(getString(R.string.HIGHEST_RATED))) {
            selected = "top_rated";
         }
-        else {
+        else if(selected.equalsIgnoreCase(getString(R.string.POPULAR))) {
             selected = "popular";
+        }
+        else {
+            retrieveTasks();
+            return;
         }
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
@@ -138,16 +157,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 if(result != null) {
 
                     List<Movie> movies = JsonUtils.parseMovieJson(result);
-                    moviesAdapter = new MoviesAdapter(movies);
-                    moviesRecyclerView.setAdapter(moviesAdapter);
-                    moviesAdapter.notifyDataSetChanged();
+                    moviesAdapter.setMovies(movies);
 
-                    moviesAdapter.setCallback(new MoviesAdapter.Callback() {
-                        @Override
-                        public void onListItemClick(int position) {
-                            startDetailActivity(moviesAdapter.getItemByPosition(position));
-                        }
-                    });
+
                 }
 
             } catch (JSONException e) {
@@ -163,5 +175,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra(Constants.MOVIE_DETAILS, bundle);
         startActivity(intent);
+    }
+
+    private void retrieveTasks() {
+        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+
+        viewModel.getMovies().observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(List<Movie> movies) {
+                Log.d(TAG, "updating list from viewmodel");
+                moviesAdapter.setMovies(movies);
+            }
+        });
     }
 }
